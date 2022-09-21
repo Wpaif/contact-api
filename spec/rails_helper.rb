@@ -1,12 +1,14 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 
+require 'spec_helper'
 require 'simplecov'
+require 'support/factory_bot'
+
 SimpleCov.start 'rails' do
   minimum_coverage 90
   maximum_coverage_drop 2
 end
 
-require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
 # Prevent database truncation if the environment is production

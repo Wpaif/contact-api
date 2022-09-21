@@ -77,6 +77,7 @@ GEM
       reline (>= 0.3.1)
     diff-lcs (1.5.0)
     digest (3.1.0)
+    docile (1.4.0)
     erubi (1.11.0)
     factory_bot (6.2.1)
       activesupport (>= 5.0.0)
@@ -200,6 +201,12 @@ GEM
     rubocop-rspec (2.13.1)
       rubocop (~> 1.33)
     ruby-progressbar (1.11.0)
+    simplecov (0.21.2)
+      docile (~> 1.1)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-html (0.12.3)
+    simplecov_json_formatter (0.1.4)
     sqlite3 (1.5.0-x86_64-linux)
     strscan (3.0.4)
     thor (1.2.1)
@@ -218,6 +225,7 @@ PLATFORMS
 DEPENDENCIES
   bootsnap
   debug
+  factory_bot
   factory_bot_rails
   faker
   puma (~> 5.0)
@@ -227,6 +235,7 @@ DEPENDENCIES
   rubocop-performance
   rubocop-rails
   rubocop-rspec
+  simplecov
   sqlite3 (~> 1.4)
   tzinfo-data
 
