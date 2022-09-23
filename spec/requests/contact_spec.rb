@@ -45,7 +45,7 @@ RSpec.describe 'Contact', type: 'request' do
     context 'with valids data' do
       it 'return http successfully' do
         contact = { name: 'Wilian Ferrera', email: 'wilian@mail.com',
-                    birthdate: Time.zone.today - 18.years }
+                    birthdate: Time.zone.today - 18.years, kind_id: create(:kind).id }
 
         post '/contacts', params: { contact: }
 
@@ -55,7 +55,7 @@ RSpec.describe 'Contact', type: 'request' do
 
       it 'renders a contact' do
         contact = { name: 'Wilian Ferrera', email: 'wilian@mail.com',
-                    birthdate: Time.zone.today - 18.years }
+                    birthdate: Time.zone.today - 18.years, kind_id: create(:kind).id }
 
         post '/contacts', params: { contact: }
 
@@ -68,7 +68,7 @@ RSpec.describe 'Contact', type: 'request' do
 
     context 'with invalids data' do
       it 'not registers contact' do
-        contact = { name: 'Wilian', email: 'wilian@mail.com', birthdate: nil }
+        contact = { name: 'Wilian', email: 'wilian@mail.com', birthdate: nil, kind_id: create(:kind).id }
 
         post '/contacts', params: { contact: }
 
