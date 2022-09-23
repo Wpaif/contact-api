@@ -1,4 +1,6 @@
 class Contact < ApplicationRecord
+  belongs_to :kind
+
   validates :name, :email, :birthdate, presence: true, allow_nil: false
   validates :email, format: URI::MailTo::EMAIL_REGEXP
   validates :email, uniqueness: true
