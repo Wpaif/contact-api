@@ -211,6 +211,9 @@ GEM
     strscan (3.0.4)
     thor (1.2.1)
     timeout (0.3.0)
+    tty-cursor (0.7.1)
+    tty-spinner (0.9.3)
+      tty-cursor (~> 0.7)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.3.0)
@@ -237,6 +240,7 @@ DEPENDENCIES
   rubocop-rspec
   simplecov
   sqlite3 (~> 1.4)
+  tty-spinner
   tzinfo-data
 
 RUBY VERSION
