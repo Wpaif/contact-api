@@ -14,7 +14,7 @@ Style/Documentation:
 Metrics/BlockLength: 
   AllowedMethods: ['describe', 'context']
   Exclude:
-   - lib/tasks/*
+   - lib/tasks/dev.rake
 
 RSpec/ExampleLength:
   Enabled: false

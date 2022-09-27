@@ -4,12 +4,12 @@ namespace :dev do
     show_spinner('Droping DB...') { `rails db:drop` }
     show_spinner('Creating DB...') { `rails db:create` }
     show_spinner('Migrating DB...') { `rails db:migrate` }
-    show_spinner('Pupulacing DB...') { populace(num_kinds: 10, num_contacts: 25) }
+    show_spinner('Pupulacing DB...') { populace(num_kinds: 10, num_contacts: 25, num_phones: 30) }
   end
 
   private
 
-  def populace(num_kinds:, num_contacts:)
+  def populace(num_kinds:, num_contacts:, num_phones:)
     num_kinds.times do
       Kind.create_or_find_by!(
         description: Faker::Types.unique.rb_string
@@ -22,6 +22,13 @@ namespace :dev do
         email: Faker::Internet.unique.email,
         birthdate: Faker::Date.birthday(min_age: 18),
         kind_id: Kind.all.sample.id
+      )
+    end
+
+    num_phones.times do
+      Phone.create_or_find_by!(
+        number: Faker::PhoneNumber.unique.phone_number,
+        contact_id: Contact.all.sample.id
       )
     end
   end

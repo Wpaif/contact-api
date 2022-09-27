@@ -1,7 +1,8 @@
 class Contact < ApplicationRecord
   belongs_to :kind
+  has_many :phones
 
-  validates :name, :email, :birthdate, presence: true, allow_nil: false
+  validates :name, :email, :birthdate, presence: true
   validates :email, format: URI::MailTo::EMAIL_REGEXP
   validates :email, uniqueness: true
   validates :birthdate, comparison: { less_than_or_equal_to: Time.zone.today - 18.years }
