@@ -3,18 +3,18 @@ class ContactsController < ApplicationController
   def index
     @contacts = Contact.includes(:kind).all
 
-    render json: @contacts
+    render json: @contacts, status: :ok
   end
 
   def show
-    render json: @contact, status: :ok
+    render json: @contact, status: :ok, include: :phones
   end
 
   def create
     @contact = Contact.new(contact_params)
 
     if @contact.save
-      render json: @contact, status: :created
+      render json: @contact, include: %i[phones kind], status: :created
     else
       render json: @contact.errors, status: :unprocessable_entity
     end
@@ -22,7 +22,7 @@ class ContactsController < ApplicationController
 
   def update
     if @contact.update(contact_params)
-      render json: @contact, status: :ok
+      render json: @contact, status: :ok, include: %i[phones kind]
     else
       render json: @contact.errors, status: :unprocessable_entity
     end
@@ -39,6 +39,7 @@ class ContactsController < ApplicationController
   end
 
   def contact_params
-    params.require(:contact).permit(:name, :email, :birthdate, :kind_id)
+    params.require(:contact).permit(:name, :email, :birthdate, :kind_id,
+                                    phones_attributes: %i[id number _destroy])
   end
 end

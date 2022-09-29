@@ -53,6 +53,19 @@ RSpec.describe 'Contact', type: 'request' do
         expect(response.content_type).to include 'application/json'
       end
 
+      it 'return http sucesfully when nested attributes is include' do
+        contact = {
+          name: 'Wilian Ferreira', email: 'wilian@main.com', birthdate: '1990-01-01', kind_id: create(:kind).id,
+          phones_attributes: [{ number: '(99) 9999-9999' }, { number: '(88) 8888-8888' }]
+        }
+
+        post '/contacts', params: { contact: }
+
+        expect(response.content_type).to include 'application/json'
+        expect(response).to have_http_status :created
+        expect(Contact.find(1).phones.any?).to be true
+      end
+
       it 'renders a contact' do
         contact = { name: 'Wilian Ferrera', email: 'wilian@mail.com',
                     birthdate: Time.zone.today - 18.years, kind_id: create(:kind).id }
@@ -64,15 +77,60 @@ RSpec.describe 'Contact', type: 'request' do
         expect(json_response['email']).to eq contact[:email]
         expect(json_response['birthdate']).to eq I18n.l(contact[:birthdate])
       end
+
+      it 'renders a contact with nested attributes' do
+        contact = {
+          name: 'Wilian Ferreira', email: 'wilian@main.com', birthdate: '1990-01-01', kind_id: create(:kind).id,
+          phones_attributes: [{ number: '(99) 9999-9999' }, { number: '(88) 8888-8888' }]
+        }
+
+        post '/contacts', params: { contact: }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response['phones'][0]['number']).to eq '(99) 9999-9999'
+        expect(json_response['phones'][1]['number']).to eq '(88) 8888-8888'
+      end
     end
 
     context 'with invalids data' do
-      it 'not registers contact' do
+      it 'return http successfully' do
         contact = { name: 'Wilian', email: 'wilian@mail.com', birthdate: nil, kind_id: create(:kind).id }
 
         post '/contacts', params: { contact: }
 
         expect(response).to have_http_status :unprocessable_entity
+        expect(response.content_type).to include 'application/json'
+      end
+
+      it 'return http sucesfully when nested attributes is include' do
+        contact = {
+          name: 'Wilian Ferreira', email: 'wilian@main.com', birthdate: '1990-01-01', kind_id: create(:kind).id,
+          phones_attributes: [{ number: 'asdfa' }]
+        }
+
+        post '/contacts', params: { contact: }
+
+        expect(response.content_type).to include 'application/json'
+        expect(response).to have_http_status :unprocessable_entity
+      end
+
+      it 'renders the errors' do
+        contact = { name: 'Wilian', email: 'wilian@mail.com', birthdate: nil, kind_id: create(:kind).id }
+
+        post '/contacts', params: { contact: }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response.any?).to be true
+      end
+
+      it 'renders the errors with nested atributes' do
+        contact = { name: 'Wilian Ferreira', email: 'wilian@main.com', birthdate: '1990-01-01', kind_id: create(:kind).id,
+                    phones_attributes: [{ number: 'asdfa' }] }
+
+        post '/contacts', params: { contact: }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response.key?('phones.number')).to be true
       end
     end
   end
@@ -88,6 +146,15 @@ RSpec.describe 'Contact', type: 'request' do
         expect(response.content_type).to include 'application/json'
       end
 
+      it 'return http sucesfully when phones attributes is include' do
+        contact = create :contact, phones_attributes: [{ number: '(99) 9999-9999' }]
+
+        patch "/contacts/#{contact.id}", params: { contact: { phones_attributes: [{ id: 1, number: '(88) 8888-8888' }] } }
+
+        expect(response).to have_http_status :ok
+        expect(response.content_type).to include 'application/json'
+      end
+
       it 'renders the contact registered' do
         contact = create :contact
 
@@ -97,10 +164,19 @@ RSpec.describe 'Contact', type: 'request' do
         contact.reload
         expect(json_response['name']).to eq contact[:name]
       end
+
+      it 'renders contact json when phones attributes is include' do
+        contact = create :contact, phones_attributes: [{ number: '(99) 9999-9999' }]
+
+        patch "/contacts/#{contact.id}", params: { contact: { phones_attributes: [{ id: 1, number: '(88) 9999-9999' }] } }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response['phones'][0]['number']).to eq '(88) 9999-9999'
+      end
     end
 
     context 'with invalids data' do
-      it 'no update contact' do
+      it 'return http successfully' do
         contact = create :contact
 
         patch "/contacts/#{contact.id}", params: { contact: { name: nil } }
@@ -109,13 +185,43 @@ RSpec.describe 'Contact', type: 'request' do
         expect(response.content_type).to include 'application/json'
       end
 
-      it 'renders json errors messages' do
+      it 'return http successfully when phones atributes is include' do
+        contact = create :contact, phones_attributes: [{ number: '(99) 9999-9999' }]
+
+        patch "/contacts/#{contact.id}", params: { contact: { phones_attributes: [{ id: 1, number: nil }] } }
+
+        expect(response).to have_http_status :unprocessable_entity
+        expect(response.content_type).to include 'application/json'
+      end
+
+      it 'renders the errors' do
         contact = create :contact
 
         patch "/contacts/#{contact.id}", params: { contact: { name: nil } }
 
         json_response = JSON.parse(response.body)
         expect(json_response.any?).to be true
+      end
+
+      it 'renders the errors when phones attributes is includes' do
+        contact = create :contact, phones_attributes: [{ number: '(99) 9999-9999' }]
+
+        patch "/contacts/#{contact.id}", params: { contact: { phones_attributes: [{ id: 1, number: nil }] } }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response.key?('phones.number')).to be true
+      end
+    end
+
+    context 'when destroy a nested phone' do
+      it 'with sucessfully' do
+        contact = create :contact, phones_attributes: [{ number: '(99) 9999-9999' }, { number: '(88) 8888-8888' }]
+
+        patch "/contacts/#{contact.id}", params: { contact: { phones_attributes: [{ id: 1, _destroy: 1 }] } }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response['phones'][0]['number']).to eq '(88) 8888-8888'
+        expect(response).to have_http_status :ok
       end
     end
   end
