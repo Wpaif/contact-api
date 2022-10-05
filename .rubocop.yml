@@ -25,3 +25,12 @@ RSpec/MultipleExpectations:
 
 RSpec/FilePath:
   Enabled: false
+
+Metrics/AbcSize:
+  exclude:
+    - lib/task/dev.rake
+
+Metrics/MethodLength:
+  exclude: 
+    - lib/task/dev.rake
+    
