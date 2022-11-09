@@ -1,7 +1,7 @@
 RSpec.describe Address, type: 'request' do
   describe 'GET /index' do
     it 'return http successfully' do
-      create :address
+      create(:address)
 
       get '/addresses'
 
@@ -10,19 +10,19 @@ RSpec.describe Address, type: 'request' do
     end
 
     it 'renders the addresses' do
-      address = create :address
+      address = create(:address)
 
       get '/addresses'
 
-      json_response = JSON.parse(response.body).first
-      expect(json_response['street']).to eq address.street
-      expect(json_response['city']).to eq address.city
+      json_response = JSON.parse(response.body, symbolize_names: true).first[1][0][:attributes]
+      expect(json_response[:street]).to eq address.street
+      expect(json_response[:city]).to eq address.city
     end
   end
 
   describe 'GET /show' do
     it 'return http successfully' do
-      address = create :address
+      address = create(:address)
 
       get "/addresses/#{address.id}"
 
@@ -31,13 +31,13 @@ RSpec.describe Address, type: 'request' do
     end
 
     it 'renders a address' do
-      address = create :address
+      address = create(:address)
 
       get "/addresses/#{address.id}"
 
-      json_response = JSON.parse(response.body)
-      expect(json_response['street']).to eq address.street
-      expect(json_response['city']).to eq address.city
+      json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
+      expect(json_response[:street]).to eq address.street
+      expect(json_response[:city]).to eq address.city
     end
   end
 
@@ -57,10 +57,9 @@ RSpec.describe Address, type: 'request' do
 
         post '/addresses', params: { address: }
 
-        json_response = JSON.parse(response.body)
-        expect(json_response['street']).to eq 'Rua dos Bobos'
-        expect(json_response['city']).to eq 'Pindorama'
-        expect(json_response['contact_id']).to eq described_class.first.contact_id
+        json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
+        expect(json_response[:street]).to eq 'Rua dos Bobos'
+        expect(json_response[:city]).to eq 'Pindorama'
       end
     end
 
@@ -89,7 +88,7 @@ RSpec.describe Address, type: 'request' do
   describe 'PATCH /update' do
     context 'with valids data' do
       it 'return http successfully' do
-        address = create :address
+        address = create(:address)
 
         patch "/addresses/#{address.id}", params: { address: { city: 'Ratanamba' } }
 
@@ -98,18 +97,18 @@ RSpec.describe Address, type: 'request' do
       end
 
       it 'renders an anddress' do
-        address = create :address
+        address = create(:address)
 
         patch "/addresses/#{address.id}", params: { address: { city: 'Ratanamba' } }
 
-        json_response = JSON.parse(response.body)
-        expect(json_response['city']).to eq 'Ratanamba'
+        json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
+        expect(json_response[:city]).to eq 'Ratanamba'
       end
     end
 
     context 'with invalids data' do
       it 'return http successfully' do
-        address = create :address
+        address = create(:address)
 
         patch "/addresses/#{address.id}", params: { address: { city: nil } }
 
@@ -118,7 +117,7 @@ RSpec.describe Address, type: 'request' do
       end
 
       it 'renders an anddress' do
-        address = create :address
+        address = create(:address)
 
         patch "/addresses/#{address.id}", params: { address: { city: nil } }
 
@@ -130,7 +129,7 @@ RSpec.describe Address, type: 'request' do
 
   describe 'DELETE /destroy' do
     it 'destroy an address' do
-      address = create :address
+      address = create(:address)
 
       delete "/addresses/#{address.id}"
 
