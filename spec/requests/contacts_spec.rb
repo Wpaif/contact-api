@@ -85,36 +85,11 @@ RSpec.describe 'Contact', type: 'request' do
 
         post '/contacts', params: { contact: }
 
-        json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
-        expect(json_response[:name]).to eq contact[:name]
-        expect(json_response[:email]).to eq contact[:email]
-        expect(json_response[:birthdate]).to eq contact[:birthdate].to_time.iso8601
-      end
-
-      it 'renders a contact with phones attributes' do
-        contact = {
-          name: 'Wilian Ferreira', email: 'wilian@main.com', birthdate: '1990-01-01', kind_id: create(:kind).id,
-          phones_attributes: [{ number: '(99) 9999-9999' }, { number: '(88) 8888-8888' }]
-        }
-
-        post '/contacts', params: { contact: }
-
-        json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
-        expect(json_response[:phones][0][:number]).to eq '(99) 9999-9999'
-        expect(json_response[:phones][1][:number]).to eq '(88) 8888-8888'
-      end
-
-      it 'renders a contact with address attributes' do
-        contact = {
-          name: 'Wilian Ferreira', email: 'wilian@main.com', birthdate: '1990-01-01',
-          kind_id: create(:kind).id, address_attributes: { city: 'Ratanabá', street: 'Rua Zero' }
-        }
-
-        post '/contacts', params: { contact: }
-
-        json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
-        expect(json_response[:address][:city]).to eq 'Ratanabá'
-        expect(json_response[:address][:street]).to eq 'Rua Zero'
+        json_response = JSON.parse(response.body, symbolize_names: true)[:data]
+        expect(json_response[:attributes][:name]).to eq contact[:name]
+        expect(json_response[:attributes][:email]).to eq contact[:email]
+        expect(json_response[:attributes][:birthdate]).to eq contact[:birthdate].to_time.iso8601
+        expect(json_response[:relationships].keys.sort).to eq %i[phones address kind].sort
       end
     end
 
@@ -223,17 +198,14 @@ RSpec.describe 'Contact', type: 'request' do
         expect(json_response[:name]).to eq contact[:name]
       end
 
-      it 'renders contact json when phones attributes is include' do
-        contact = create(:contact, phones_attributes: [{ number: '(99) 9999-9999' }],
-                                   address_attributes: { city: 'Ratanabá', street: 'Rua Zero' })
+      it 'renders contact json when nesteds attributes is include' do
+        contact = create(:contact, phones_attributes: [{ number: '(99) 9999-9999' }])
 
         phones_attributes = [{ id: 1, number: '(88) 9999-9999' }]
-        address_attributes = { id: 1, city: 'Ratanabá', street: 'Rua Um' }
-        patch "/contacts/#{contact.id}", params: { contact: { phones_attributes:, address_attributes: } }
+        patch "/contacts/#{contact.id}", params: { contact: { phones_attributes: } }
 
-        json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
-        expect(json_response[:phones][0][:number]).to eq '(88) 9999-9999'
-        expect(json_response[:address][:street]).to eq 'Rua Um'
+        json_response = JSON.parse(response.body, symbolize_names: true)[:data]
+        expect(json_response[:relationships][:phones][:data][0][:id].to_i).to eq contact.phones[0].id
       end
     end
 
@@ -299,8 +271,9 @@ RSpec.describe 'Contact', type: 'request' do
 
         patch "/contacts/#{contact.id}", params: { contact: { phones_attributes: [{ id: 1, _destroy: 1 }] } }
 
-        json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
-        expect(json_response[:phones][0][:number]).to eq '(88) 8888-8888'
+        json_response = JSON.parse(response.body, symbolize_names: true)[:data]
+        expect(json_response[:relationships][:phones][:data].first[:id].to_i).to eq contact.phones.first.id
+        expect(json_response[:relationships][:phones].length).to eq contact.phones.length
         expect(response).to have_http_status :ok
       end
     end
