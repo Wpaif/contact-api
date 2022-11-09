@@ -1,7 +1,7 @@
 RSpec.describe Phone, type: 'request' do
   describe 'GET /index' do
     it 'return http successfully' do
-      create :phone
+      create(:phone)
 
       get '/phones'
 
@@ -10,19 +10,18 @@ RSpec.describe Phone, type: 'request' do
     end
 
     it 'renders json with phones' do
-      phone = create :phone
-
+      phone = create(:phone)
       get '/phones'
 
-      json_response = JSON.parse(response.body).first
-      expect(json_response['number']).to eq phone.number
-      expect(json_response['contact_id']).to eq phone.contact_id
+      json_response = JSON.parse(response.body, symbolize_names: true)[:data].first[:attributes]
+      expect(json_response[:number]).to eq phone.number
+      expect(json_response[:'contact-id']).to eq phone.contact_id
     end
   end
 
   describe 'GET /show' do
     it 'return http successfully' do
-      phone = create :phone
+      phone = create(:phone)
 
       get "/phones/#{phone.id}"
 
@@ -31,20 +30,20 @@ RSpec.describe Phone, type: 'request' do
     end
 
     it 'renders json with phone' do
-      phone = create :phone
+      phone = create(:phone)
 
       get "/phones/#{phone.id}"
 
-      json_response = JSON.parse(response.body)
-      expect(json_response['number']).to eq phone.number
-      expect(json_response['contact_id']).to eq phone.contact_id
+      json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
+      expect(json_response[:number]).to eq phone.number
+      expect(json_response[:'contact-id']).to eq phone.contact_id
     end
   end
 
   describe 'POST /create' do
     context 'with valids data' do
       it 'return http successfully' do
-        contact = create :contact
+        contact = create(:contact)
 
         post '/phones', params: { phone: { number: '(99)9999-9999', contact_id: contact.id } }
 
@@ -53,20 +52,20 @@ RSpec.describe Phone, type: 'request' do
       end
 
       it 'renders json with phone created' do
-        contact = create :contact
+        contact = create(:contact)
         phone = { number: '(99)9999-9999', contact_id: contact.id }
 
         post '/phones', params: { phone: }
 
-        json_response = JSON.parse(response.body)
-        expect(json_response['number']).to eq phone[:number]
+        json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
+        expect(json_response[:number]).to eq phone[:number]
         expect(response).to have_http_status :created
       end
     end
 
     context 'with invalids data' do
       it 'return http successfully' do
-        contact = create :contact
+        contact = create(:contact)
 
         post '/phones', params: { phone: { number: nil, contact_id: contact.id } }
 
@@ -75,7 +74,7 @@ RSpec.describe Phone, type: 'request' do
       end
 
       it 'renders json with errors' do
-        contact = create :contact
+        contact = create(:contact)
         phone = { number: nil, contact_id: contact.id }
 
         post '/phones', params: { phone: }
@@ -89,7 +88,7 @@ RSpec.describe Phone, type: 'request' do
   describe 'PATCH /update' do
     context 'with valids data' do
       it 'return http successfully' do
-        phone = create :phone, number: '(99) 9999-9999'
+        phone = create(:phone, number: '(99) 9999-9999')
 
         patch "/phones/#{phone.id}", params: { phone: { number: '(11) 9999-9999' } }
 
@@ -98,19 +97,19 @@ RSpec.describe Phone, type: 'request' do
       end
 
       it 'return json with phone updated' do
-        phone = create :phone, number: '(99) 9999-9999'
+        phone = create(:phone, number: '(99) 9999-9999')
 
         patch "/phones/#{phone.id}", params: { phone: { number: '(11) 9999-9999' } }
 
-        json_response = JSON.parse(response.body)
-        expect(json_response['number']).to eq '(11) 9999-9999'
+        json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
+        expect(json_response[:number]).to eq '(11) 9999-9999'
       end
     end
   end
 
   describe 'DELETE /destroy' do
     it 'destroy a register' do
-      phone = create :phone, number: '(11) 9999-9999'
+      phone = create(:phone, number: '(11) 9999-9999')
 
       delete "/phones/#{phone.id}"
 
