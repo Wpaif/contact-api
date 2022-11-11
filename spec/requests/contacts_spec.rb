@@ -34,10 +34,11 @@ RSpec.describe 'Contact', type: 'request' do
 
       get "/contacts/#{contact.id}"
 
-      json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
-      expect(json_response[:name]).to eq contact.name
-      expect(json_response[:email]).to eq contact.email
-      expect(json_response[:birthdate]).to eq contact.birthdate.to_time.iso8601
+      json_response = JSON.parse(response.body, symbolize_names: true)
+      expect(json_response[:data][:attributes][:name]).to eq contact.name
+      expect(json_response[:data][:attributes][:email]).to eq contact.email
+      expect(json_response[:data][:attributes][:birthdate]).to eq contact.birthdate.to_time.iso8601
+      expect(json_response[:included][0][:type]).to eq 'kinds'
     end
   end
 
