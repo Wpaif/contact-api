@@ -35,9 +35,10 @@ RSpec.describe Address, type: 'request' do
 
       get "/addresses/#{address.id}"
 
-      json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
-      expect(json_response[:street]).to eq address.street
-      expect(json_response[:city]).to eq address.city
+      json_response = JSON.parse(response.body, symbolize_names: true)[:data]
+      expect(json_response[:attributes][:street]).to eq address.street
+      expect(json_response[:attributes][:city]).to eq address.city
+      expect(json_response[:relationships][:contact][:links][:related]).to include "contacts/#{address.id}"
     end
   end
 

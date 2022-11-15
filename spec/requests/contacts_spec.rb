@@ -9,21 +9,21 @@ RSpec.describe 'Contact', type: 'request' do
 
     it 'renders all contacts registereds' do
       contact = create(:contact)
+      create(:address, contact:)
 
       get '/contacts'
 
       json_response = JSON.parse(response.body, symbolize_names: true).first[1][0]
-      # debugger
       expect(json_response[:attributes][:name]).to eq contact.name
       expect(json_response[:attributes][:email]).to eq contact.email
       expect(json_response[:attributes][:birthdate]).to eq contact.birthdate.to_time.iso8601
-      expect(json_response[:meta][:consultation]).to eq Time.zone.now.iso8601
     end
   end
 
   describe 'GET /show' do
     it 'return http succssfully' do
       contact = create(:contact)
+      create(:address, contact:)
 
       get "/contacts/#{contact.id}"
 
@@ -33,6 +33,7 @@ RSpec.describe 'Contact', type: 'request' do
 
     it 'renders a Contact' do
       contact = create(:contact)
+      create(:address, contact:)
 
       get "/contacts/#{contact.id}"
 
@@ -49,7 +50,10 @@ RSpec.describe 'Contact', type: 'request' do
     context 'with valids data' do
       it 'return http successfully' do
         contact = { name: 'Wilian Ferrera', email: 'wilian@mail.com',
-                    birthdate: Time.zone.today - 18.years, kind_id: create(:kind).id }
+                    birthdate: Time.zone.today - 18.years, kind_id: create(:kind).id,
+                    address_attributes: {
+                      street: 'Rua dos Bobos', city: 'Pindorama', contact_id: 1
+                    } }
 
         post '/contacts', params: { contact: }
 
@@ -61,7 +65,10 @@ RSpec.describe 'Contact', type: 'request' do
         contact = {
           name: 'Wilian Ferreira', email: 'wilian@main.com', birthdate: '1990-01-01',
           kind_id: create(:kind).id, phones_attributes: [{ number: '(99) 9999-9999' },
-                                                         { number: '(88) 8888-8888' }]
+                                                         { number: '(88) 8888-8888' }],
+          address_attributes: {
+            street: 'Rua dos Bobos', city: 'Pindorama', contact_id: 1
+          }
         }
 
         post '/contacts', params: { contact: }
@@ -85,15 +92,19 @@ RSpec.describe 'Contact', type: 'request' do
 
       it 'renders a contact' do
         contact = { name: 'Wilian Ferrera', email: 'wilian@mail.com',
-                    birthdate: Time.zone.today - 18.years, kind_id: create(:kind).id }
+                    birthdate: Time.zone.today - 18.years, kind_id: create(:kind).id,
+                    address_attributes: {
+                      street: 'Rua dos Bobos', city: 'Pindorama', contact_id: 1
+                    } }
 
         post '/contacts', params: { contact: }
 
-        json_response = JSON.parse(response.body, symbolize_names: true)[:data]
-        expect(json_response[:attributes][:name]).to eq contact[:name]
-        expect(json_response[:attributes][:email]).to eq contact[:email]
-        expect(json_response[:attributes][:birthdate]).to eq contact[:birthdate].to_time.iso8601
-        expect(json_response[:relationships].keys.sort).to eq %i[phones address kind].sort
+        json_response = JSON.parse(response.body, symbolize_names: true)
+        expect(json_response[:data][:attributes][:name]).to eq contact[:name]
+        expect(json_response[:data][:attributes][:email]).to eq contact[:email]
+        expect(json_response[:data][:attributes][:birthdate]).to eq contact[:birthdate].to_time.iso8601
+        expect(json_response[:data][:relationships].keys.sort).to eq %i[phones address kind].sort
+        expect(json_response[:data][:relationships][:kind][:links][:related]).to include "/kinds/#{contact[:kind_id]}"
       end
     end
 
@@ -167,6 +178,7 @@ RSpec.describe 'Contact', type: 'request' do
     context 'with valids data' do
       it 'return http successfully' do
         contact = create(:contact)
+        create(:address, contact:)
 
         patch "/contacts/#{contact.id}", params: { contact: { name: 'Wilian Ferreira' } }
 
@@ -176,6 +188,7 @@ RSpec.describe 'Contact', type: 'request' do
 
       it 'return http sucesfully when phones attributes is include' do
         contact = create(:contact, phones_attributes: [{ number: '(99) 9999-9999' }])
+        create(:address, contact:)
 
         patch "/contacts/#{contact.id}", params: { contact: { phones_attributes: [{ id: 1, number: '(88) 8888-8888' }] } }
 
@@ -194,6 +207,7 @@ RSpec.describe 'Contact', type: 'request' do
 
       it 'renders the contact registered' do
         contact = create(:contact)
+        create(:address, contact:)
 
         patch "/contacts/#{contact.id}", params: { contact: { name: 'Wilian Ferreira' } }
 
@@ -204,6 +218,7 @@ RSpec.describe 'Contact', type: 'request' do
 
       it 'renders contact json when nesteds attributes is include' do
         contact = create(:contact, phones_attributes: [{ number: '(99) 9999-9999' }])
+        create(:address, contact:)
 
         phones_attributes = [{ id: 1, number: '(88) 9999-9999' }]
         patch "/contacts/#{contact.id}", params: { contact: { phones_attributes: } }
@@ -272,6 +287,7 @@ RSpec.describe 'Contact', type: 'request' do
     context 'when destroy a nested phone' do
       it 'with sucessfully' do
         contact = create(:contact, phones_attributes: [{ number: '(99) 9999-9999' }, { number: '(88) 8888-8888' }])
+        create(:address, contact:)
 
         patch "/contacts/#{contact.id}", params: { contact: { phones_attributes: [{ id: 1, _destroy: 1 }] } }
 
