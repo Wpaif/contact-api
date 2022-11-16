@@ -52,6 +52,7 @@ RSpec.describe 'Contact', type: 'request' do
       expect(json_response[:data][:attributes][:email]).to eq contact.email
       expect(json_response[:data][:attributes][:birthdate]).to eq contact.birthdate.to_time.iso8601
       expect(json_response[:included][0][:type]).to eq 'kinds'
+      expect(json_response[:data][:relationships].keys.sort).to eq %i[address kind phones].sort
       expect(json_response[:data][:meta][:consultation]).to eq Time.zone.now.iso8601
     end
   end
