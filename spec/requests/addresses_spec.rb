@@ -3,16 +3,16 @@ RSpec.describe Address, type: 'request' do
     it 'return http successfully' do
       create(:address)
 
-      get '/addresses'
+      get '/addresses', headers: { accept: 'application/vnd.api+json' }
 
       expect(response).to have_http_status :ok
-      expect(response.content_type).to include 'application/json'
+      expect(response.content_type).to include 'application/vnd.api+json'
     end
 
     it 'renders the addresses' do
       address = create(:address)
 
-      get '/addresses'
+      get '/addresses', headers: { accept: 'application/vnd.api+json' }
 
       json_response = JSON.parse(response.body, symbolize_names: true).first[1][0][:attributes]
       expect(json_response[:street]).to eq address.street
@@ -24,16 +24,16 @@ RSpec.describe Address, type: 'request' do
     it 'return http successfully' do
       address = create(:address)
 
-      get "/addresses/#{address.id}"
+      get "/addresses/#{address.id}", headers: { accept: 'application/vnd.api+json' }
 
-      expect(response.content_type).to include 'application/json'
+      expect(response.content_type).to include 'application/vnd.api+json'
       expect(response).to have_http_status :ok
     end
 
     it 'renders a address' do
       address = create(:address)
 
-      get "/addresses/#{address.id}"
+      get "/addresses/#{address.id}", headers: { accept: 'application/vnd.api+json' }
 
       json_response = JSON.parse(response.body, symbolize_names: true)[:data]
       expect(json_response[:attributes][:street]).to eq address.street
@@ -47,16 +47,16 @@ RSpec.describe Address, type: 'request' do
       it 'return http successfully' do
         address = { street: 'Rua dos Bobos', city: 'Pindorama', contact_id: create(:contact).id }
 
-        post '/addresses', params: { address: }
+        post '/addresses', headers: { accept: 'application/vnd.api+json' }, params: { address: }
 
-        expect(response.content_type).to include 'application/json'
+        expect(response.content_type).to include 'application/vnd.api+json'
         expect(response).to have_http_status :created
       end
 
       it 'renders an address' do
         address = { street: 'Rua dos Bobos', city: 'Pindorama', contact_id: create(:contact).id }
 
-        post '/addresses', params: { address: }
+        post '/addresses', headers: { accept: 'application/vnd.api+json' }, params: { address: }
 
         json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
         expect(json_response[:street]).to eq 'Rua dos Bobos'
@@ -68,16 +68,16 @@ RSpec.describe Address, type: 'request' do
       it 'return http successfully' do
         address = { street: nil, city: 'Pindorama', contact_id: nil }
 
-        post '/addresses', params: { address: }
+        post '/addresses', headers: { accept: 'application/vnd.api+json' }, params: { address: }
 
-        expect(response.content_type).to include 'application/json'
+        expect(response.content_type).to include 'application/vnd.api+json'
         expect(response).to have_http_status :unprocessable_entity
       end
 
       it 'renders the errors' do
         address = { street: nil, city: 'Pindorama', contact_id: nil }
 
-        post '/addresses', params: { address: }
+        post '/addresses', headers: { accept: 'application/vnd.api+json' }, params: { address: }
 
         json_response = JSON.parse(response.body)
         expect(json_response['contact'].any?).to be true
@@ -91,16 +91,18 @@ RSpec.describe Address, type: 'request' do
       it 'return http successfully' do
         address = create(:address)
 
-        patch "/addresses/#{address.id}", params: { address: { city: 'Ratanamba' } }
+        patch "/addresses/#{address.id}", headers: { accept: 'application/vnd.api+json' },
+                                          params: { address: { city: 'Ratanamba' } }
 
         expect(response).to have_http_status :ok
-        expect(response.content_type).to include 'application/json'
+        expect(response.content_type).to include 'application/vnd.api+json'
       end
 
       it 'renders an anddress' do
         address = create(:address)
 
-        patch "/addresses/#{address.id}", params: { address: { city: 'Ratanamba' } }
+        patch "/addresses/#{address.id}", headers: { accept: 'application/vnd.api+json' },
+                                          params: { address: { city: 'Ratanamba' } }
 
         json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
         expect(json_response[:city]).to eq 'Ratanamba'
@@ -111,16 +113,18 @@ RSpec.describe Address, type: 'request' do
       it 'return http successfully' do
         address = create(:address)
 
-        patch "/addresses/#{address.id}", params: { address: { city: nil } }
+        patch "/addresses/#{address.id}", headers: { accept: 'application/vnd.api+json' },
+                                          params: { address: { city: nil } }
 
         expect(response).to have_http_status :unprocessable_entity
-        expect(response.content_type).to include 'application/json'
+        expect(response.content_type).to include 'application/vnd.api+json'
       end
 
       it 'renders an anddress' do
         address = create(:address)
 
-        patch "/addresses/#{address.id}", params: { address: { city: nil } }
+        patch "/addresses/#{address.id}", headers: { accept: 'application/vnd.api+json' },
+                                          params: { address: { city: nil } }
 
         json_response = JSON.parse(response.body)
         expect(json_response['city'].any?).to be true
@@ -132,7 +136,7 @@ RSpec.describe Address, type: 'request' do
     it 'destroy an address' do
       address = create(:address)
 
-      delete "/addresses/#{address.id}"
+      delete "/addresses/#{address.id}", headers: { accept: 'application/vnd.api+json' }
 
       expect(response).to have_http_status :no_content
       expect(described_class.any?).to be false

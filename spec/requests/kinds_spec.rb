@@ -3,16 +3,16 @@ RSpec.describe Kind, type: 'request' do
     it 'return http successfully' do
       create(:kind)
 
-      get '/kinds'
+      get '/kinds', headers: { accept: 'application/vnd.api+json' }
 
-      expect(response.content_type).to include 'application/json'
+      expect(response.content_type).to include 'application/vnd.api+json'
       expect(response).to have_http_status :ok
     end
 
     it 'renders a json with kinds' do
       kind = create(:kind)
 
-      get '/kinds'
+      get '/kinds', headers: { accept: 'application/vnd.api+json' }
 
       json_response = JSON.parse(response.body, symbolize_names: true)[:data].first[:attributes]
       expect(json_response[:description]).to eq kind.description
@@ -23,17 +23,15 @@ RSpec.describe Kind, type: 'request' do
     it 'return http successfully' do
       kind = create(:kind)
 
-      get "/kinds/#{kind.id}"
-
-      expect(response.content_type).to include 'application/json'
+      get "/kinds/#{kind.id}", headers: { accept: 'application/vnd.api+json' }
+      expect(response.content_type).to include 'application/vnd.api+json'
       expect(response).to have_http_status :ok
     end
 
     it 'renders a json with kind' do
       kind = create(:kind)
 
-      get "/kinds/#{kind.id}"
-
+      get "/kinds/#{kind.id}", headers: { accept: 'application/vnd.api+json' }
       json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
       expect(json_response[:description]).to eq kind.description
     end
@@ -44,16 +42,16 @@ RSpec.describe Kind, type: 'request' do
       it 'renders http successfully' do
         kind = { description: 'generic description' }
 
-        post '/kinds', params: { kind: }
+        post '/kinds', headers: { accept: 'application/vnd.api+json' }, params: { kind: }
 
-        expect(response.content_type).to include 'application/json'
+        expect(response.content_type).to include 'application/vnd.api+json'
         expect(response).to have_http_status :created
       end
 
       it 'renders kind created' do
         kind = { description: 'generic description' }
 
-        post '/kinds', params: { kind: }
+        post '/kinds', headers: { accept: 'application/vnd.api+json' }, params: { kind: }
 
         json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
         expect(json_response[:description]).to eq kind[:description]
@@ -64,16 +62,16 @@ RSpec.describe Kind, type: 'request' do
       it 'does not create a kind' do
         kind = { description: nil }
 
-        post '/kinds', params: { kind: }
+        post '/kinds', headers: { accept: 'application/vnd.api+json' }, params: { kind: }
 
-        expect(response.content_type).to include 'application/json'
+        expect(response.content_type).to include 'application/vnd.api+json'
         expect(response).to have_http_status :unprocessable_entity
       end
 
       it 'renders the errors' do
         kind = { description: nil }
 
-        post '/kinds', params: { kind: }
+        post '/kinds', headers: { accept: 'application/vnd.api+json' }, params: { kind: }
 
         json_response = JSON.parse(response.body)
         expect(json_response.key?('description')).to be true
@@ -86,16 +84,18 @@ RSpec.describe Kind, type: 'request' do
       it 'render http successfully' do
         kind = create(:kind)
 
-        patch "/kinds/#{kind.id}", params: { kind: { description: 'description updated' } }
+        patch "/kinds/#{kind.id}", headers: { accept: 'application/vnd.api+json' },
+                                   params: { kind: { description: 'description updated' } }
 
-        expect(response.content_type).to include 'application/json'
+        expect(response.content_type).to include 'application/vnd.api+json'
         expect(response).to have_http_status :ok
       end
 
       it 'renders a updated kind' do
         kind = create(:kind)
 
-        patch "/kinds/#{kind.id}", params: { kind: { description: 'description updated' } }
+        patch "/kinds/#{kind.id}", headers: { accept: 'application/vnd.api+json' },
+                                   params: { kind: { description: 'description updated' } }
 
         json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
         expect(json_response[:description]).to eq 'description updated'
@@ -106,16 +106,18 @@ RSpec.describe Kind, type: 'request' do
       it 'render http successfully' do
         kind = create(:kind)
 
-        patch "/kinds/#{kind.id}", params: { kind: { description: nil } }
+        patch "/kinds/#{kind.id}", headers: { accept: 'application/vnd.api+json' },
+                                   params: { kind: { description: nil } }
 
-        expect(response.content_type).to include 'application/json'
+        expect(response.content_type).to include 'application/vnd.api+json'
         expect(response).to have_http_status :unprocessable_entity
       end
 
       it 'renders the errors' do
         kind = create(:kind)
 
-        patch "/kinds/#{kind.id}", params: { kind: { description: nil } }
+        patch "/kinds/#{kind.id}", headers: { accept: 'application/vnd.api+json' },
+                                   params: { kind: { description: nil } }
 
         json_response = JSON.parse(response.body)
         expect(json_response.key?('description')).to be true
@@ -127,7 +129,7 @@ RSpec.describe Kind, type: 'request' do
     it 'destroy a kind' do
       kind = create(:kind)
 
-      delete "/kinds/#{kind.id}"
+      delete "/kinds/#{kind.id}", headers: { accept: 'application/vnd.api+json' }
 
       expect(response).to have_http_status :no_content
       expect(described_class.all.any?).to be false

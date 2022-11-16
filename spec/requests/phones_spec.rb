@@ -3,15 +3,16 @@ RSpec.describe Phone, type: 'request' do
     it 'return http successfully' do
       create(:phone)
 
-      get '/phones'
+      get '/phones', headers: { accept: 'application/vnd.api+json' }
 
-      expect(response.content_type).to include 'application/json'
+      expect(response.content_type).to include 'application/vnd.api+json'
       expect(response).to have_http_status :ok
     end
 
     it 'renders json with phones' do
       phone = create(:phone)
-      get '/phones'
+
+      get '/phones', headers: { accept: 'application/vnd.api+json' }
 
       json_response = JSON.parse(response.body, symbolize_names: true)[:data].first[:attributes]
       expect(json_response[:number]).to eq phone.number
@@ -23,16 +24,16 @@ RSpec.describe Phone, type: 'request' do
     it 'return http successfully' do
       phone = create(:phone)
 
-      get "/phones/#{phone.id}"
+      get "/phones/#{phone.id}", headers: { accept: 'application/vnd.api+json' }
 
-      expect(response.content_type).to include 'application/json'
+      expect(response.content_type).to include 'application/vnd.api+json'
       expect(response).to have_http_status :ok
     end
 
     it 'renders json with phone' do
       phone = create(:phone)
 
-      get "/phones/#{phone.id}"
+      get "/phones/#{phone.id}", headers: { accept: 'application/vnd.api+json' }
 
       json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
       expect(json_response[:number]).to eq phone.number
@@ -45,9 +46,10 @@ RSpec.describe Phone, type: 'request' do
       it 'return http successfully' do
         contact = create(:contact)
 
-        post '/phones', params: { phone: { number: '(99)9999-9999', contact_id: contact.id } }
+        post '/phones', headers: { accept: 'application/vnd.api+json' },
+                        params: { phone: { number: '(99)9999-9999', contact_id: contact.id } }
 
-        expect(response.content_type).to include 'application/json'
+        expect(response.content_type).to include 'application/vnd.api+json'
         expect(response).to have_http_status :created
       end
 
@@ -55,7 +57,7 @@ RSpec.describe Phone, type: 'request' do
         contact = create(:contact)
         phone = { number: '(99)9999-9999', contact_id: contact.id }
 
-        post '/phones', params: { phone: }
+        post '/phones', headers: { accept: 'application/vnd.api+json' }, params: { phone: }
 
         json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
         expect(json_response[:number]).to eq phone[:number]
@@ -67,9 +69,10 @@ RSpec.describe Phone, type: 'request' do
       it 'return http successfully' do
         contact = create(:contact)
 
-        post '/phones', params: { phone: { number: nil, contact_id: contact.id } }
+        post '/phones', headers: { accept: 'application/vnd.api+json' },
+                        params: { phone: { number: nil, contact_id: contact.id } }
 
-        expect(response.content_type).to include 'application/json'
+        expect(response.content_type).to include 'application/vnd.api+json'
         expect(response).to have_http_status :unprocessable_entity
       end
 
@@ -77,7 +80,7 @@ RSpec.describe Phone, type: 'request' do
         contact = create(:contact)
         phone = { number: nil, contact_id: contact.id }
 
-        post '/phones', params: { phone: }
+        post '/phones', headers: { accept: 'application/vnd.api+json' }, params: { phone: }
 
         json_response = JSON.parse(response.body)
         expect(json_response.key?('number')).to be true
@@ -90,16 +93,18 @@ RSpec.describe Phone, type: 'request' do
       it 'return http successfully' do
         phone = create(:phone, number: '(99) 9999-9999')
 
-        patch "/phones/#{phone.id}", params: { phone: { number: '(11) 9999-9999' } }
+        patch "/phones/#{phone.id}", headers: { accept: 'application/vnd.api+json' },
+                                     params: { phone: { number: '(11) 9999-9999' } }
 
-        expect(response.content_type).to include 'application/json'
+        expect(response.content_type).to include 'application/vnd.api+json'
         expect(response).to have_http_status :ok
       end
 
       it 'return json with phone updated' do
         phone = create(:phone, number: '(99) 9999-9999')
 
-        patch "/phones/#{phone.id}", params: { phone: { number: '(11) 9999-9999' } }
+        patch "/phones/#{phone.id}", headers: { accept: 'application/vnd.api+json' },
+                                     params: { phone: { number: '(11) 9999-9999' } }
 
         json_response = JSON.parse(response.body, symbolize_names: true)[:data][:attributes]
         expect(json_response[:number]).to eq '(11) 9999-9999'
@@ -111,7 +116,7 @@ RSpec.describe Phone, type: 'request' do
     it 'destroy a register' do
       phone = create(:phone, number: '(11) 9999-9999')
 
-      delete "/phones/#{phone.id}"
+      delete "/phones/#{phone.id}", headers: { accept: 'application/vnd.api+json' }
 
       expect(response).to have_http_status :no_content
       expect(described_class.all.any?).to be false
